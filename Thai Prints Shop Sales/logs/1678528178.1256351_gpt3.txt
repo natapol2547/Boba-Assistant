@@ -1,0 +1,23 @@
+ 1000  
+
+{
+  "choices": [
+    {
+      "finish_reason": null,
+      "index": 0,
+      "message": {
+        "content": "\"Retrieve data on the latest message in conversation ID 1000.\"",
+        "role": "assistant"
+      }
+    }
+  ],
+  "created": 1678528176,
+  "id": "chatcmpl-6sq92D6ZCZO4kZKFTqNN7XYe34RWU",
+  "model": "gpt-3.5-turbo-0301",
+  "object": "chat.completion",
+  "usage": {
+    "completion_tokens": 16,
+    "prompt_tokens": 79,
+    "total_tokens": 95
+  }
+}

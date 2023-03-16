@@ -1,0 +1,23 @@
+I would like Soap Packaging Boxes and the address is 98/150 Nanthana Garden Village.
+
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "content": "\"Thaiprintshop Soap Packaging Boxes order to 98/150 address.\"",
+        "role": "assistant"
+      }
+    }
+  ],
+  "created": 1678525789,
+  "id": "chatcmpl-6spWXn2VpvQJLqbTipEld7l6dEi4s",
+  "model": "gpt-3.5-turbo-0301",
+  "object": "chat.completion",
+  "usage": {
+    "completion_tokens": 19,
+    "prompt_tokens": 509,
+    "total_tokens": 528
+  }
+}

@@ -1,0 +1,23 @@
+Can you provide me some links for me
+
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "content": "ISE program fees and expenses at Chulalongkorn University - search now.",
+        "role": "assistant"
+      }
+    }
+  ],
+  "created": 1678243276,
+  "id": "chatcmpl-6re1s7HwXOsovxzROQJXgBzGxYGK9",
+  "model": "gpt-3.5-turbo-0301",
+  "object": "chat.completion",
+  "usage": {
+    "completion_tokens": 18,
+    "prompt_tokens": 316,
+    "total_tokens": 334
+  }
+}

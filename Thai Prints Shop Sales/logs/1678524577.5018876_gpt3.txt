@@ -1,0 +1,23 @@
+I want to buy some soap boxes how much is it?
+
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "content": "\"Price inquiry for soap boxes in recent conversation.\"",
+        "role": "assistant"
+      }
+    }
+  ],
+  "created": 1678524576,
+  "id": "chatcmpl-6spCy2iKuUFue1729UYF8qdyTgqIa",
+  "model": "gpt-3.5-turbo-0301",
+  "object": "chat.completion",
+  "usage": {
+    "completion_tokens": 12,
+    "prompt_tokens": 87,
+    "total_tokens": 99
+  }
+}

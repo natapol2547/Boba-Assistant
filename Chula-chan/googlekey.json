@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "thai-prints-shop",
+  "private_key_id": "760997896fc15bbc82e2542d1743043445dab209",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDcf39EK9bueLhX\ncsPdnGYhTVJqXkReS2I8npPPD9BuEdhLJlgtATQF+qGEJEhRTeanykVWS/FODbNV\nsDmot7rzaAY9vDvtMlpGCHOHONiOIacOmTtt16IxDGUsxDouSFt36EfVpbXJhqFG\niJvR0pTo3eTXj5I6LOdOr4RpT7aD89AZ0fus9FRjrLF01s1zrc73ndc5HHzbAeM8\n1jRHg8oPdjYk4CbLgscEeBauL/FMr1ET6McVrzKrRbgIJ7YmiFrUx2pzGxjWzCFZ\nXu8bzoqjhQUJaZUhaLpMjQEUhC30ZCReXdSs11ve1fHU9i9/QHePGeGOatz07P46\nkyjaKZHjAgMBAAECggEAL7CZt4Zd1bUhdbR6PW+qvTAqj5v04IogZKkNof6zH2NX\nqyVPc+hrNpHXJivswjz9krPSXFBPkAixjWpwhhe65RNOKkMQmQRHdxcz2X7Hg7Iu\nnh8xNdgqGb6rEUwdo03+DoicJM7S6xPlxMoeHXsUvurjKGZCg7ebja6zjk1x1cba\nqGEzRmJBAzqpGKoFpfkA/Pm1+UlMIxOeR1tmReUDMXUha/3BiWap+hw5VQvCSyDc\nkIZrE1B8CSSbY3VYx6sdvsin0Sr7cTZZ3fBNl47POVFkNoXv9Ss7i7YUCav/b3Zw\nGx5CVbpTh9kARM670D5YoN++PGxfdJd8s6zijpnR3QKBgQDvS8BJcg/Uo9urfW8p\nwa9KgkaI2G0hqDoZlfmiOi/eeLcjQ8y9c1HMvv3iVYQOiTPl7POS/DksRsHDmuOa\niD2XMqczN3atspIYnph+Z8rGFKWyj1LEiOcWlTrvizJk5Jsx5nFzkc/RhmNuf7vV\nk0n5pFzzQjZjpteD+O64vHY1hQKBgQDr49NgFHM3PHxXHaoBqimFOe+l9B4oz8Ix\nB/hhqZLun6KoVmc/kUb6RoVwcCqn84ePksxJEEkAqkWeOO5jUZKOgDW3D2EdG29W\nqjXkRDZcB7IZDgVSz407BRG5Hb/4n/37GbQhY1UIpjBIXlbnI1Mi0wbZ1P53Pyq4\ndpXeLXXyRwKBgQCtqPLGGlHkxnmf7arjydz1nK+lljM0zspDUTTWB5Y/xKlbnVOT\nVYJSrXTAccEhb27LePeXfxXazQrHcrukpSTVenweziyBh+tAlLAkZByjPc62VA8D\n9DqIiAo6V3FeCQ2b3BoPfg0siHPWeDqPl5GC60ZNf4rLLQSQkPJl/NdopQKBgCq/\n1h3SdvLqtkn/aUD1+qJXVpQHwrN4u2OxYxUn6yXtrke9qOZ/SJKw1xwCZ+iaHNYr\nL3SKTACf2xAKl0FOljXXDGUJl3rz7uCQ5kVhC0zwZBlgThys2pZ4m7alqpW/QQMR\nrHBklROFMrjax/sJjtZ/0f0GObuYqgBWFWD3cimfAoGAKjZ+uXldK0QFGdy03HS9\nPnnxZjD2c2tPyiTBbrJrMajbYrL7HdjdxoI1908FJHwx7edVd+WhCgs8VnYfYbw5\nn8ix8Tx6jKmhzaXr8HhoMTDdZSt6sbyb0fXaZcxivvaRz7i2UZd5V1nQL/O7vVHu\nM8REiyMcl/AKctNlE1PBqms=\n-----END PRIVATE KEY-----\n",
+  "client_email": "thai-prints-shop@thai-prints-shop.iam.gserviceaccount.com",
+  "client_id": "102907932821674499447",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/thai-prints-shop%40thai-prints-shop.iam.gserviceaccount.com"
+}

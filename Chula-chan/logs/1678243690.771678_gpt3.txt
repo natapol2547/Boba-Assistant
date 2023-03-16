@@ -1,0 +1,23 @@
+Hmm I am really interested in ICE please tell me more about it.
+
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "content": "\"Chulalongkorn University ICE program details and requirements.\"",
+        "role": "assistant"
+      }
+    }
+  ],
+  "created": 1678243689,
+  "id": "chatcmpl-6re8XiFaGafu1KWio5ixj4JUKooUW",
+  "model": "gpt-3.5-turbo-0301",
+  "object": "chat.completion",
+  "usage": {
+    "completion_tokens": 15,
+    "prompt_tokens": 328,
+    "total_tokens": 343
+  }
+}

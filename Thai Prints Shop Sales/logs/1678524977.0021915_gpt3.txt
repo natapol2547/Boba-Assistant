@@ -1,0 +1,23 @@
+Hi, I would like to buy a box of soap. How much is it?
+
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "content": "\"Price of soap box for recent customer inquiry.\"",
+        "role": "assistant"
+      }
+    }
+  ],
+  "created": 1678524976,
+  "id": "chatcmpl-6spJQtqnI5Nr3Wpx0Qv1VNxVlIwyp",
+  "model": "gpt-3.5-turbo-0301",
+  "object": "chat.completion",
+  "usage": {
+    "completion_tokens": 12,
+    "prompt_tokens": 92,
+    "total_tokens": 104
+  }
+}

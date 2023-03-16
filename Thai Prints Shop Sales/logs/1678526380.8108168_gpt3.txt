@@ -1,0 +1,23 @@
+I want 1000 boxes of soap, what is the price?
+
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "content": "\"Price inquiry for 1000 boxes of soap order request.\"",
+        "role": "assistant"
+      }
+    }
+  ],
+  "created": 1678526379,
+  "id": "chatcmpl-6spg3fTNrnvnE6FqZkxcepDnh7ohu",
+  "model": "gpt-3.5-turbo-0301",
+  "object": "chat.completion",
+  "usage": {
+    "completion_tokens": 15,
+    "prompt_tokens": 108,
+    "total_tokens": 123
+  }
+}

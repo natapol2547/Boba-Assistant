@@ -1,0 +1,23 @@
+Can you give me an example of the prices
+
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "content": "Sure! Our prices for soap boxes range from \u0e3f10 to \u0e3f50 per unit, depending on the size and material. \n\nSearch prompt: Retrieve most recent message in conversation for database analysis.",
+        "role": "assistant"
+      }
+    }
+  ],
+  "created": 1678524540,
+  "id": "chatcmpl-6spCOu6M7wtU1dapIfgZSeta1RnCL",
+  "model": "gpt-3.5-turbo-0301",
+  "object": "chat.completion",
+  "usage": {
+    "completion_tokens": 44,
+    "prompt_tokens": 218,
+    "total_tokens": 262
+  }
+}
