@@ -24,7 +24,7 @@ def replace_substring_ignore_case(original_string, substring, replacement):
     return pattern.sub(replacement, original_string)
 
 
-def create_route(route_name, FAISS_dir, Faiss_data, bot_purpose, bot_startwith, user_mem_dir, line_bot_api_key, channel_secret_key, app, Thai_self = "ดิฉัน", sales_bot=False):
+def create_route(route_name, model, FAISS_dir, Faiss_data, bot_purpose, bot_startwith, user_mem_dir, line_bot_api_key, channel_secret_key, app, Thai_self = "ดิฉัน", sales_bot=False, FAISS_fetch_num = 2, memory_fetch_num = 3):
     # Create LineBotApi and WebhookHandler instances
     line_bot_api = LineBotApi(line_bot_api_key)
     handler = WebhookHandler(channel_secret_key)
@@ -67,12 +67,12 @@ def create_route(route_name, FAISS_dir, Faiss_data, bot_purpose, bot_startwith, 
             message = translate_text(message, src=language, dest='en')
 
             # bot_purpose = bot_purpose
-            response, duplicated_webhook = response_generation(message, bot_purpose, bot_startwith, FAISS_dir, user_mem_dir, user_id, Faiss_data, webhookEventId)
+            response, possible_answers, duplicated_webhook = response_generation(message, model, bot_purpose, bot_startwith, FAISS_dir, user_mem_dir, user_id, Faiss_data, webhookEventId, FAISS_fetch_num, memory_fetch_num)
             # print(response)
             if not duplicated_webhook:
                 
                 if sales_bot:
-                    response = "[Automatic message]\n" + response
+                    response = "[Automatic message]\n\n" + response
                 if language == 'th':
                     response = response.lower().replace("that's great to hear", "Awesome").replace("i see.", "").replace("sure thing", "แน่นอน ")
 
@@ -82,7 +82,7 @@ def create_route(route_name, FAISS_dir, Faiss_data, bot_purpose, bot_startwith, 
                     response = ''.join(words)
                     # print(output_str)
                     
-                    response = translate_text(response, src= 'en', dest= language).replace("หรือไม่", "หรือไม่คะ").replace("ไหม", "ไหมคะ").replace("ไหน", "ไหนคะ").replace("อย่างไร", "อย่างไรคะ").replace("ไหม?", "ไหมคะ ").replace("ค่ะ ค่ะ", "ค่ะ").replace("ฉัน", Thai_self).replace("ผม", Thai_self).replace("?", "คะ").replace("ไร ไหม", "ไร").replace(" คะ", "คะ").replace("คะคะ", "คะ").replace(f"{Thai_self}ค่ะ", f"{Thai_self}นะคะ").replace("มาที่นี่", "อยู่ที่นี่").replace("!ค่ะ", "ค่ะ")
+                    response = translate_text(response, src= 'en', dest= language).replace("หรือไม่", "หรือไม่คะ").replace("ไหม", "ไหมคะ").replace("ไหน", "ไหนคะ").replace("อย่างไร", "อย่างไรคะ").replace("ไหม?", "ไหมคะ ").replace("ค่ะ ค่ะ", "ค่ะ").replace("ฉัน", Thai_self).replace("ผม", Thai_self).replace("?", "คะ").replace("ไร ไหม", "ไร").replace(" คะ", "คะ").replace("คะคะ", "คะ").replace(f"{Thai_self}ค่ะ", f"{Thai_self}นะคะ").replace("มาที่นี่", "อยู่ที่นี่").replace("!ค่ะ", "ค่ะ").replace("คะคะคะ", "คะ")
                     
                     for subtext in ["ค่ะ", "คะ"]:
                         if subtext in (response[-10:] if len(response) >= abs(-10) else response):
@@ -95,9 +95,9 @@ def create_route(route_name, FAISS_dir, Faiss_data, bot_purpose, bot_startwith, 
                 else:
                     response = translate_text(response, src= 'en', dest= language)
                 
+                # quick_replies = 
                 
-                
-                line_bot_api.reply_message(event.reply_token, TextSendMessage(response))
+                line_bot_api.reply_message(event.reply_token, [TextSendMessage(text = response, quick_reply=QuickReply([QuickReplyButton(action=MessageAction(possible_answer,possible_answer)) for possible_answer in possible_answers]))])
             else:
                 print(f'{colored(f"---Duplicated webhook---", "red")}')
             

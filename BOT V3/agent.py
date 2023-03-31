@@ -34,11 +34,13 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
+
 import traceback
 
 from langchain.embeddings import HuggingFaceEmbeddings
-
 embeddings = HuggingFaceEmbeddings()
+
+from box_price_calculate import *
 
 def isExist(dir):
     isExist = os.path.exists(dir)
@@ -228,7 +230,7 @@ def load_text_content(url):
 
     return text_content
 
-def response_generation(query, bot_purpose, bot_prefix, FAISS_dir, user_mem_dir, user_id, Faiss_data, webhookEventId):
+def response_generation(query, model, bot_purpose, bot_prefix, FAISS_dir, user_mem_dir, user_id, Faiss_data, webhookEventId, FAISS_fetch_num, memory_fetch_num):
     
     # python_dir = os.path.dirname(os.path.realpath(__file__))
     # user_mem_dir = python_dir + "/Boba-chan/Users"
@@ -266,7 +268,7 @@ def response_generation(query, bot_purpose, bot_prefix, FAISS_dir, user_mem_dir,
 
         def QAsystem(input):
             print(f"QAsystem: {input}")
-            docs = vectorstore.similarity_search(input, k=2)
+            docs = vectorstore.similarity_search(input, k=FAISS_fetch_num)
             answer = ""
             for doc in docs:
                 answer +=  f""""{doc.page_content}"\nURL: {doc.metadata["source"]}\n\n"""
@@ -321,6 +323,7 @@ def response_generation(query, bot_purpose, bot_prefix, FAISS_dir, user_mem_dir,
 
         # import requests
         from langchain.text_splitter import CharacterTextSplitter
+        from langchain.text_splitter import RecursiveCharacterTextSplitter
         from langchain.document_loaders import UnstructuredURLLoader
         def get_url_content(string):
             print(f"Loading Content: {string}")
@@ -330,7 +333,7 @@ def response_generation(query, bot_purpose, bot_prefix, FAISS_dir, user_mem_dir,
                 return "Wrong format of Action Input used. Use `<question>,<url>` format."
             try:
                 # question_embedding = embeddings(question)
-                text_splitter = CharacterTextSplitter(chunk_size=500, chunk_overlap=0)
+                text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=0)
                 docs = text_splitter.create_documents([load_text_content(url)])
                 db = FAISS.from_documents(docs, embeddings)
                 related_docs = db.similarity_search(question, k=1)
@@ -341,32 +344,51 @@ def response_generation(query, bot_purpose, bot_prefix, FAISS_dir, user_mem_dir,
             except Exception as e: 
                 print(traceback.format_exc())
                 return f"Unable to load url content of {url}. Please try another url."
-
-        tools = [
-            Tool(
-                name = "Search",
-                func=api_search,
-                description="useful for when you need to answer questions about current events. The input to this tool should be a sentence about what you want to search."
-            ),
-            Tool(
-                name = f"{Faiss_data} Direct Data",
-                func=QAsystem,
-                description=f"very useful for when you need to answer questions about {Faiss_data}. Use this instead of Search if possible. Input should be a clear question."
-            ),
-            Tool(
-                name="Get content from URL",
-                func=get_url_content,
-                description="useful for getting the full content from a url link."
-                "The input should be in this format <question>,<url>"
-                "For example, `What is this link about?,https://examplelink.com` would be the input for this tool."
-            ),
-            Tool(
-                name="Human",
-                func=human,
-                description="useful when you are unsure of the input, and need more information about it. The input should be a question about the input."
-            ),
-            
-        ]
+        if model == "conversational-chatbot-agent":
+            tools = [
+                Tool(
+                    name = "Search",
+                    func=api_search,
+                    description="useful for when you need to answer questions about current events. The input to this tool should be a sentence about what you want to search."
+                ),
+                Tool(
+                    name = f"{Faiss_data} Direct Data",
+                    func=QAsystem,
+                    description=f"very useful for when you need to answer questions about {Faiss_data}. Use this instead of Search if possible. Input should be a clear question."
+                ),
+                Tool(
+                    name="Get content from URL",
+                    func=get_url_content,
+                    description="useful for getting the full content from a url link."
+                    "The input should be in this format <question>,<url>"
+                    "For example, `What is this link about?,https://examplelink.com` would be the input for this tool."
+                ),
+                Tool(
+                    name="Human",
+                    func=human,
+                    description="useful when you are unsure of the input, and need more information about it. The input should be a question about the input."
+                ),
+                
+            ]
+        elif model == "thai-prints-shop-agent":
+            tools = [
+                Tool(
+                    name = "Box price calculator",
+                    func=get_box_price,
+                    description="useful for when you need calculate the accurate price of a box or bag. Do not hesitate to use the tool or guess the price of box yourself. The input should be in `width, length, height, amount, type` format. Note: Width, Length, Height are in centimeters. Type can either be 'box' or 'bag'"
+                ),
+                Tool(
+                    name = f"{Faiss_data} Direct Data",
+                    func=QAsystem,
+                    description=f"very useful for when you need to answer questions about {Faiss_data}. Use this instead of Search if possible. Input should be a clear question."
+                ),
+                Tool(
+                    name="Human",
+                    func=human,
+                    description="useful when you are unsure of the input, and need more information about it. The input should be a question about the input."
+                ),
+                
+            ]
 
         prefix = f"""Role: You are an AI Assistant for a person named {bot_prefix}. You are to analyze and guide {bot_prefix} find answers and thought about the messages {bot_prefix} got from human. You always generate informative and long Final Answer with citations. The current date and time is {timestamp_to_datetime(time.time())}
 Analyze the latest message mainly. You may not need tools in a normal conversation, although you have access to the following tools:"""
@@ -403,7 +425,7 @@ Analyze the latest message mainly. You may not need tools in a normal conversati
         else:
             special_condition = f"You have been talking to this person for {time_difference(conversation[0]['time'], time_now)}. Time for the earliest message of today: {time_of_earliest_message_of_today(conversation)}"
             # print(special_condition)
-        last_messages = get_last_messages(conversation, 2)
+        last_messages = get_last_messages(conversation, memory_fetch_num)
         message_vector = embeddings.embed_query(query)
         user_memories = fetch_memories(message_vector,conversation, 2)
         contexts = user_memories + last_messages
@@ -466,11 +488,14 @@ Analyze the latest message mainly. You may not need tools in a normal conversati
             
             template = """{bot_purpose}
 
+This is some of the search results from your computer.
 {agent_context}
 
 {special_condition} The date and time currently is: {time}.
 
-Reply as {bot_prefix} for the last message. Conversation history:
+Create one reply as {bot_prefix} to the latest Human's message. 
+
+Conversation history:
 {chat_history}
 Human: {input}
 {bot_prefix}:"""
@@ -492,6 +517,8 @@ Human: {input}
             response = chain({"agent_context": agent_answer, "special_condition": special_condition ,"time": timestamp_to_datetime(time_now),  "bot_purpose" : bot_purpose,  "input": query, "bot_prefix" : bot_prefix}, return_only_outputs=True)["text"]
             # print(response)
             response = response.split('Human:')[0].strip()
+            # response = response.split(': ')[0].strip()
+            response = response.split(f"{bot_prefix}:")[0].strip()
             
             info = {'time': time_now, 'vector': message_vector, 'message_user': query, 'message_ai': response, 'webhookEventId': webhookEventId, 'uuid': str(uuid4())}
             filename = 'log_%s.json' % time_now
@@ -500,9 +527,38 @@ Human: {input}
             token_amount = cb.total_tokens
             print("Token used in the previous response: " + str(token_amount) + f" ( ${round(token_amount/1000*0.002,3)} / {round(token_amount/1000*0.002*34.09,3)} ฿ )")
             
+            chat = ChatOpenAI(temperature=0)
+            messages = [
+                HumanMessage(content=query),
+                AIMessage(content=response),
+                HumanMessage(content="Generate a numbered list of 5 of one word replies for Human from the conversation.")
+            ]
+            chat_possible_answer = chat(messages).content.split('\n')
+            print(chat_possible_answer)
+            # Remove the list numbers from each item in the output list
+            try:
+                possible_answers = [item.split('. ', 1)[1] for item in chat_possible_answer if item]
+            except:
+                possible_answers = ["My order", "More product", "Contact admin"]
             
+            # output_dict = {"quickReply": {"items": []}}
+
+            # for text in possible_answers:
+            #     item_dict = {
+            #         "type": "action",
+            #         "action": {
+            #             "type": "message",
+            #             "label": text,
+            #             "text": text
+            #             }
+            #     }
+            #     output_dict["quickReply"]["items"].append(item_dict)
+
+            # output_json = json.dumps(output_dict)
+
+
             
-            return response, False
+            return response, possible_answers, False
         
     else:
-        return "Duplicated Webhook", True
+        return "Duplicated Webhook", "", True
