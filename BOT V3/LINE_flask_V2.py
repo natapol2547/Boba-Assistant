@@ -39,6 +39,7 @@ from langchain.prompts.chat import (
 )
 
 from selenium import webdriver
+from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
@@ -77,6 +78,8 @@ import traceback
 from langchain.embeddings import HuggingFaceInstructEmbeddings
 model_name = "hkunlp/instructor-large"
 embeddings = HuggingFaceInstructEmbeddings(model_name=model_name)
+
+
 
 # from box_price_calculate import *
 
@@ -360,12 +363,23 @@ def extract_image_links(text):
     
     # Find all matches of the pattern in the text
     matches = re.findall(pattern, text)
+    image_types = ["jpg", "jpeg", "png", "gif", "bmp"]
+    new_urls = []
+    for url in matches:
+        # Use regular expression to extract file extension
+        match = re.search(r'\.([a-zA-Z0-9]+)$', url)
+        if match and match.group(1).lower() in image_types:
+            # This is a link to an image file, so we'll skip it
+            continue
+        else:
+            # This is not an image link, so we'll keep it
+            new_urls.append(url)
     
     # Replace the image links with the text "image sent to user"
     updated_text = re.sub(pattern, "image sent to user", text)
     
     # Return a tuple containing the extracted image links and the updated text
-    return matches, updated_text
+    return new_urls
 
 
 def check_urls(urls):
@@ -439,6 +453,9 @@ def response_generation(query, model, bot_purpose, bot_prefix, FAISS_dir, user_m
             except:
                 return "Wrong format of Action Input used. Use `width, length, height, amount` format."
             try:
+                ActionChains(driver).key_down(Keys.CONTROL).send_keys('t').key_up(Keys.CONTROL).perform()
+                # Switch to the new tab
+                driver.switch_to.window(driver.window_handles[-1])
                 # Navigate to the website
                 driver.get('https://box-estimate.vercel.app/')
                 # time.sleep(1)
@@ -493,9 +510,17 @@ def response_generation(query, model, bot_purpose, bot_prefix, FAISS_dir, user_m
                 div_text = root_div.text.replace('\n', ' ').replace('Calculate ', '').replace('ขนาดกางออก ', '\nขนาดกางออก').replace('พื้นที่ทั้งหมด ', '\nพื้นที่ทั้งหมด').replace('ราคารวม ', '\nราคารวม')
                 
                 div_text = translate_text(div_text, 'th', 'en')
+                
+                # Close the current tab
+                driver.execute_script("window.open('https://www.example.com', '_blank');")
+                driver.close()
+
+                # Switch back to the first tab
+                driver.switch_to.window(driver.window_handles[0])
+
                 # driver.quit()
                 # print(div_text)
-                div_text += " (This is not the final price as no additional specification is added yet. If there is any additional specification please find the price per box of it and use this formula: (Prices for production per one boxe/bag + price of additional specification or techniques on the box/bag) * amount of boxs/bags + Design fee + Shipping fee ( + 300 Baht ) * 1.07 (vat 7%) = Total Price)"
+                div_text += " [This is the starting price. The Final price is calculated using this formula: Starting price of Boxes/Bags + price of additional techniques on the Boxes/Bags + Design fee + Shipping fee ( + 300 Baht ) * 1.07 (vat 7%) = Total Price]"
                 if "ไม่เกินขนาด A3" in div_text:
                     return "Box size too big. Size must not be more than A4. Please use a smaller dimensions."
                 return div_text
@@ -618,11 +643,7 @@ def response_generation(query, model, bot_purpose, bot_prefix, FAISS_dir, user_m
                 return f"Unable to load url content of {url}. Please try another url."
         if model == "conversational-chatbot-agent":
             tools = [
-                Tool(
-                    name = "Search",
-                    func=api_search,
-                    description="useful for when you need to answer questions about current events. The input to this tool should be a sentence about what you want to search."
-                ),
+                load_tools(["searx-search"], searx_host="http://localhost:8888", llm=ChatOpenAI(temperature=0.2)),
                 Tool(
                     name = f"Specific Data",
                     func=QAsystem,
@@ -645,14 +666,14 @@ def response_generation(query, model, bot_purpose, bot_prefix, FAISS_dir, user_m
         elif model == "thai-prints-shop-agent":
             tools = [
                 Tool(
-                    name = "Base boxes price calculator",
+                    name = "Starting price calculator",
                     func=get_box_price,
-                    description="very useful for when you need calculate the base price of a normal box or bag without any techniques and custom specification. All information must be provided by human before using the tool. The input should be in `width, length, height, amount, type` format. Note: Width, Length, Height inputs must be integers. Amount input must be an integer the is more than 100. Type can either be 'box' or 'bag'"
+                    description="very useful for when you need calculate the starting price of a normal box or bag. All information must be provided by human before using the tool. The input should be in `<width>, <length>, <height>, <amount>, <type>` format. Note: Width, Length, Height inputs must be integers. Amount input must be an integer the is more than 100. Type can either be 'box' or 'bag'"
                 ),
                 Tool(
                     name = f"Specific Data",
                     func=QAsystem,
-                    description=f"useful for when you need to look for more information about {Faiss_data}. Use this instead of Search if possible. Input should be the information that you want to know."
+                    description=f"useful for when you need to look for more information about {Faiss_data}. Input should be the information that you want to know."
                 ),
                 Tool(
                     name="Human",
@@ -662,7 +683,7 @@ def response_generation(query, model, bot_purpose, bot_prefix, FAISS_dir, user_m
                 
             ]
 
-        prefix = f"""You are an AI Assistant for someone named "{bot_prefix}". You are to use tools generate the Final Answer for "{bot_prefix}" to answer his instruction/question. Generate an informative Final Answer. The current date and time is {timestamp_to_datetime(time.time())}
+        prefix = f"""You are an AI Assistant for someone named "{bot_prefix}". You are to use tools generate the Final Answer for "{bot_prefix}" following his instruction/question/request. Generate an informative Final Answer. The current date and time is {timestamp_to_datetime(time.time())}
 You have access to the following tools:"""
         suffix = """Begin generating answer."""
 
@@ -677,11 +698,10 @@ You have access to the following tools:"""
             SystemMessagePromptTemplate(prompt=prompt),
             HumanMessagePromptTemplate.from_template("" +
                         """ensure that you generated string meets the following Regex requirements.
-When action/tools are needed generate a string starting with "Action:<tool name>" and the following string starting
-with "Action Input:<tool input>" separated by a newline.
-When no further Action is needed generate the Final Answer by saying "Final Answer:<Final Answer>".\n"""
-                        "Analyze the messages in the converastion below especially the latest message which is the instruction/question. Use Action to make Observations. When ready, generate a confident Final Answer for the latest message. The string to generate must contain whether an Action or a Final Answer."
-                        "\n\nChat history:\n{chat_history}\nHuman: {input}\n\nInformation from Observation:\n{agent_scratchpad}")
+When action/tools are needed generate a string starting with "Action:<tool name>" with "Action Input:<tool input>" separated by a newline.
+When None of the tools for Action is needed, generate the Final Answer by saying "Final Answer:<Final Answer>".\n"""
+                        "Analyze the messages in the converastion below especially the latest message which is the instruction/question. Use Action to make Observations if necessary. When information is sufficient, generate an informative Final Answer. The string to generate must contain whether an Action or a Final Answer. Remember that you cannot reply with images yet, but you can send links and texts"
+                        "\n\nConversation history:\n{chat_history}\n" + f"{bot_prefix}" + ": {input}\nAI:\n\nInformation from Observation:\n{agent_scratchpad}")
         ]
         prompt = ChatPromptTemplate.from_messages(messages)
         # print(prompt)
@@ -704,7 +724,7 @@ When no further Action is needed generate the Final Answer by saying "Final Answ
         contexts = remove_duplicate_memory(contexts)
         
         memory_chat = ConversationBufferMemory(memory_key="chat_history", input_key="input", ai_prefix= bot_prefix)
-        memory_agent = ConversationBufferMemory(memory_key="chat_history", input_key="input", human_prefix= bot_prefix)
+        memory_agent = ConversationBufferMemory(memory_key="chat_history", input_key="input", human_prefix= bot_prefix, ai_prefix="AI")
         
         for context in contexts:
             memory_chat.save_context({"input": context["message_user"]}, {"output": context["message_ai"]})
@@ -712,7 +732,7 @@ When no further Action is needed generate the Final Answer by saying "Final Answ
         
         # memory_agent.save_context({"input": contexts[-1]["message_user"]}, {"output": contexts[-1]["message_ai"]})
         
-        llm_chain = LLMChain(llm=ChatOpenAI(temperature=0, max_tokens=500), prompt=prompt)
+        llm_chain = LLMChain(llm=ChatOpenAI(temperature=0.2, max_tokens=500), prompt=prompt)
         tool_names = [tool.name for tool in tools]
         agent = ZeroShotAgent(llm_chain=llm_chain, allowed_tools=tool_names)
         agent_executor = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, verbose=False, max_iterations=3, early_stopping_method="generate", memory=memory_agent)
@@ -729,7 +749,7 @@ When no further Action is needed generate the Final Answer by saying "Final Answ
                     
                     
                     agent_answer = agent_executor.run(query)
-                    image_links, agent_answer = extract_image_links(agent_answer)
+                    image_links = extract_image_links(agent_answer)
                     images_agent = [image_message(url) for url in image_links]
                     
                     break
@@ -769,7 +789,7 @@ This is some of the search results from your computer.
 
 {special_condition} The date and time currently is: {time}.
 
-Create one reply as {bot_prefix} to the latest Human's message. 
+Create one reply as {bot_prefix} to the latest Human's message. Do not put text placeholder in your reply.
 
 Conversation history:
 {chat_history}
@@ -789,7 +809,7 @@ Human: {input}
             #     memory.save_context({"input": mem['message_user']}, {"output": mem['message_ai']})
             #     # else:
             #     #     memory.save_context()
-            chain = LLMChain(llm = ChatOpenAI(temperature=0.25, model_kwargs = {"presence_penalty": 1, "frequency_penalty": 1} , max_tokens = 1000), memory=memory_chat, prompt=prompt)
+            chain = LLMChain(llm = ChatOpenAI(temperature=0.2, model_kwargs = {"presence_penalty": 0.5, "frequency_penalty": 0.5} , max_tokens = 1000), memory=memory_chat, prompt=prompt)
             response = chain({"agent_context": agent_answer, "special_condition": special_condition ,"time": timestamp_to_datetime(time_now),  "bot_purpose" : bot_purpose,  "input": query, "bot_prefix" : bot_prefix}, return_only_outputs=True)["text"]
             # print(response)
             response = response.split('Human:')[0].strip()

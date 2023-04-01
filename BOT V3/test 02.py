@@ -1,20 +1,29 @@
 import re
 
-def find_urls(text):
-    # Regular expression pattern to match URLs
-    pattern = r'(https?://[^\s]+)'
-    
-    # Use re.findall to find all matches of the pattern in the text
-    urls = re.findall(pattern, text)
-    
-    urls = [url.rstrip('.') for url in urls]
-# print(urls)
+def remove_image_links(urls):
+    """
+    This function takes in a list of URLs and returns a new list with any links to images removed.
+    """
+    image_types = ["jpg", "jpeg", "png", "gif", "bmp"]
+    new_urls = []
+    for url in urls:
+        # Use regular expression to extract file extension
+        match = re.search(r'\.([a-zA-Z0-9]+)$', url)
+        if match and match.group(1).lower() in image_types:
+            # This is a link to an image file, so we'll skip it
+            continue
+        else:
+            # This is not an image link, so we'll keep it
+            new_urls.append(url)
+    return new_urls
 
-    # Return the list of URLs
-    return urls
+my_urls = [
+    "https://example.com",
+    "https://example.com/image.jpg",
+    "https://example.com/document.pdf",
+    "https://example.com/image.png",
+    "https://example.com/other.html",
+]
 
-
-
-text = "You can see all the images here: https://www.thaiprintshop.com/collection/box/%E0%B8%AB%E0%B8%A5%E0%B8%B9%E0%B9%88-box/"
-urls = find_urls(text)
-print(urls)
+new_urls = remove_image_links(my_urls)
+print(new_urls)
