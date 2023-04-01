@@ -40,9 +40,9 @@ load_dotenv()
 os.environ['OPENAI_API_KEY'] = os.getenv('OPENAI_KEY')
 openai.api_key = os.getenv('OPENAI_KEY')
 
-
-from langchain.embeddings import HuggingFaceEmbeddings
-embeddings = HuggingFaceEmbeddings()
+from langchain.embeddings import HuggingFaceInstructEmbeddings
+model_name = "hkunlp/instructor-large"
+embeddings = HuggingFaceInstructEmbeddings(model_name=model_name)
 
 
 
@@ -229,7 +229,7 @@ def remove_utf8(text):
 
 def remove_newlines(text):
     # Replace all \r and \n characters with an empty string
-    return text.replace('\r', '').replace('\n', '')
+    return text.replace('\r', ' ').replace('\n', ' ')
 
 
 # def process_text(text):
@@ -347,7 +347,7 @@ if input("Vectorize Website? (Y/N): ").lower() == 'y':
     #     return my_list
 
     def run_concurrent(function, args_list, desc = ""):
-        with ThreadPoolExecutor(max_workers=100) as executor:
+        with ThreadPoolExecutor(max_workers=2) as executor:
             # Use the submit method to submit tasks to the executor
             futures = [executor.submit(function, arg) for arg in args_list]
             results = []
@@ -394,7 +394,7 @@ if input("Vectorize Website? (Y/N): ").lower() == 'y':
         
     strings_to_translate = [d.page_content for d in texts]
     
-    def chunk_list(lst, chunk_size=10):
+    def chunk_list(lst, chunk_size=2):
         # Generator function to yield chunks of the list
         for i in range(0, len(lst), chunk_size):
             yield lst[i:i+chunk_size]
@@ -412,7 +412,7 @@ if input("Vectorize Website? (Y/N): ").lower() == 'y':
 
     # Replace the 'page_content' key with the translated text in each dictionary
     for i in range(len(texts)):
-        texts[i].page_content = translated_strings[i]
+        texts[i].page_content = translated_strings[i].replace("stars", "stamps").replace("star", "stamp").replace("ticket", "piece").replace("leave", "piece").replace("card", "piece")
     
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=750, chunk_overlap=50)
     texts = text_splitter.split_documents(texts)

@@ -94,3 +94,11 @@ def get_box_price(string) :
         return div_text
     except:
         return "Contacting website failed."
+
+
+start_time = time.time()
+print(get_box_price("7,5,5,1000,box"))
+print(get_box_price("7,5,5,1000,box"))
+end_time = time.time()
+total_time = end_time - start_time
+print(f"Program took {total_time:.2f} seconds to run.")

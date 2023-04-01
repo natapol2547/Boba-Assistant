@@ -390,7 +390,7 @@ def response_generation(query, model, bot_purpose, bot_prefix, FAISS_dir, user_m
                 
             ]
 
-        prefix = f"""Role: You are an AI Assistant for {bot_prefix}. You are to answer whether the prompt need to use tools or not. You are to use tools that is neccessary, analyze and guide {bot_prefix} to find answers and thought about the messages {bot_prefix} got from human. You always generate informative and long Final Answer with citations. The current date and time is {timestamp_to_datetime(time.time())}
+        prefix = f"""Role: You are an AI Assistant for a person named {bot_prefix}. You are to analyze and guide {bot_prefix} find answers and thought about the messages {bot_prefix} got from human. You always generate informative and long Final Answer with citations. The current date and time is {timestamp_to_datetime(time.time())}
 Analyze the latest message mainly. You may not need tools in a normal conversation, although you have access to the following tools:"""
         suffix = """Begin generating answer."""
 
